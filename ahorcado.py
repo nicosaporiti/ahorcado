@@ -1,9 +1,9 @@
+""" Juego del ahorcado """
 import random
-import requests
 import json
-import qrcode
 import os
-from PIL import Image
+import requests
+import qrcode
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,11 +12,13 @@ API_KEY = os.environ.get('API_KEY')
 
 
 def obtener_palabra():
+    """Obtiene una palabra aleatoria de la API de palabras aleatorias"""
     palabras = ["python", "programacion", "computadora", "juego", "ahorcado"]
     return random.choice(palabras)
 
 
 def dibujar_ahorcado(intentos):
+    """Dibuja el ahorcado según la cantidad de intentos"""
     if intentos == 6:
         print(" _____")
         print("|     |")
@@ -69,6 +71,7 @@ def dibujar_ahorcado(intentos):
 
 
 def jugar():
+    """Juega al juego del ahorcado"""
     palabra = obtener_palabra()
     palabra_secreta = ["_"] * len(palabra)
     intentos = 6
@@ -87,8 +90,8 @@ def jugar():
 
             if letra in palabra:
                 print("¡Correcto!")
-                for i in range(len(palabra)):
-                    if palabra[i] == letra:
+                for i, current_char in enumerate(palabra):
+                    if current_char == letra:
                         palabra_secreta[i] = letra
 
                 if "_" not in palabra_secreta:
@@ -106,6 +109,7 @@ def jugar():
 
 
 def generar_lnurl():
+    """Genera un lnurl para recibir 20 sats"""
     endpoint = "https://legend.lnbits.com/withdraw/api/v1/links"
     api_key = API_KEY
     headers = {"X-Api-Key": api_key, "Content-Type": "application/json"}
@@ -120,7 +124,8 @@ def generar_lnurl():
         "webhook_url": ""
     }
 
-    response = requests.post(endpoint, headers=headers, data=json.dumps(data))
+    response = requests.post(endpoint, headers=headers,
+                             data=json.dumps(data), timeout=10)
 
     if response.status_code == 201:
         result = json.loads(response.text)
@@ -134,13 +139,14 @@ def generar_lnurl():
 
 
 def mostrar_premio_en_qr(lnurl):
+    """Muestra el premio en un código QR"""
     # crea el código QR
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(lnurl)
-    qr.make(fit=True)
+    qr_code = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr_code.add_data(lnurl)
+    qr_code.make(fit=True)
 
     # convierte el código QR en imagen
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr_code.make_image(fill_color="black", back_color="white")
 
     # muestra la imagen del código QR
     img.show()
